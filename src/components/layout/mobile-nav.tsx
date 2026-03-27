@@ -12,40 +12,19 @@ import {
 import { cn } from "@/lib/utils"
 
 const navItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Transactions",
-    href: "/dashboard/transactions",
-    icon: Receipt,
-  },
-  {
-    title: "Add",
-    href: "/dashboard/transactions/new",
-    icon: Plus,
-    isAction: true,
-  },
-  {
-    title: "Budget",
-    href: "/dashboard/budget",
-    icon: PiggyBank,
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
+  { title: "Home", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Transactions", href: "/dashboard/transactions", icon: Receipt },
+  { title: "Add", href: "/dashboard/transactions/new", icon: Plus, isAction: true },
+  { title: "Budget", href: "/dashboard/budget", icon: PiggyBank },
+  { title: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
 export function MobileNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
-      <div className="flex items-center justify-around rounded-2xl border border-white/[0.08] bg-card/80 px-2 py-1 backdrop-blur-2xl shadow-2xl">
+    <nav className="fixed bottom-6 left-6 right-6 z-50 md:hidden">
+      <div className="flex items-center justify-around rounded-3xl border border-white/[0.08] bg-black/90 px-4 py-3 backdrop-blur-2xl shadow-2xl shadow-black/50">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           const isAction = item.isAction
@@ -55,10 +34,13 @@ export function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center justify-center -mt-6"
+                className="-mt-10"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-500 text-white shadow-lg shadow-violet-500/40">
-                  <item.icon className="h-6 w-6" />
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-amber-400 to-amber-500 blur-xl opacity-50" />
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-b from-amber-400 to-amber-500 shadow-lg shadow-amber-500/40">
+                    <Plus className="h-7 w-7 text-black" strokeWidth={2.5} />
+                  </div>
                 </div>
               </Link>
             )
@@ -68,24 +50,24 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center py-3 text-xs transition-all",
-                isActive
-                  ? "text-white"
-                  : "text-muted-foreground"
-              )}
+              className="flex flex-col items-center gap-1 py-1"
             >
               <div
                 className={cn(
-                  "mb-1 flex h-9 w-9 items-center justify-center rounded-xl transition-all",
+                  "flex h-11 w-11 items-center justify-center rounded-xl transition-all",
                   isActive
-                    ? "bg-gradient-to-br from-violet-600/30 to-indigo-500/30"
-                    : ""
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "text-muted-foreground"
                 )}
               >
                 <item.icon className="h-5 w-5" />
               </div>
-              <span className="font-medium">{item.title}</span>
+              <span className={cn(
+                "text-[10px] font-medium",
+                isActive ? "text-amber-400" : "text-muted-foreground"
+              )}>
+                {item.title}
+              </span>
             </Link>
           )
         })}

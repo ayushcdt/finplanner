@@ -2,11 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --card: 0 0% 98%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
@@ -23,43 +25,29 @@
     --border: 240 6% 90%;
     --input: 240 6% 90%;
     --ring: 262 83% 58%;
-    --radius: 0.75rem;
-
-    /* Finance colors */
-    --income: 142 76% 36%;
-    --income-glow: 142 76% 36%;
-    --expense: 0 84% 60%;
-    --expense-glow: 0 84% 60%;
-    --savings: 217 91% 60%;
+    --radius: 1rem;
   }
 
   .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 95%;
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 95%;
-    --popover: 240 10% 6%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 95%;
-    --destructive: 0 63% 31%;
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 47 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 262 83% 58%;
-
-    /* Finance colors - brighter for dark mode */
-    --income: 142 71% 45%;
-    --income-glow: 142 76% 36%;
-    --expense: 0 84% 60%;
-    --expense-glow: 0 84% 60%;
-    --savings: 217 91% 60%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 47 100% 50%;
   }
 }
 
@@ -67,124 +55,168 @@
   * {
     @apply border-border;
   }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Premium Glass Effects */
+/* Premium Components */
 @layer components {
+  /* Glass morphism */
   .glass {
-    @apply bg-card/50 backdrop-blur-xl border border-white/[0.08];
+    @apply bg-white/[0.02] backdrop-blur-2xl;
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .glass-strong {
-    @apply bg-card/80 backdrop-blur-2xl border border-white/[0.12];
+  /* Premium card with border gradient */
+  .premium-card {
+    @apply relative bg-card rounded-3xl overflow-hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .glass-subtle {
-    @apply bg-card/30 backdrop-blur-lg border border-white/[0.05];
-  }
-
-  .glow-income {
-    box-shadow: 0 0 30px -5px hsl(var(--income-glow) / 0.4);
-  }
-
-  .glow-expense {
-    box-shadow: 0 0 30px -5px hsl(var(--expense-glow) / 0.4);
-  }
-
-  .glow-primary {
-    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.4);
-  }
-
-  .gradient-income {
-    @apply bg-gradient-to-r from-emerald-500 to-green-400;
-  }
-
-  .gradient-expense {
-    @apply bg-gradient-to-r from-rose-500 to-red-400;
-  }
-
-  .gradient-primary {
-    @apply bg-gradient-to-r from-violet-600 to-indigo-500;
-  }
-
-  .gradient-card {
-    @apply bg-gradient-to-br from-white/[0.08] to-transparent;
-  }
-
-  /* Premium card hover */
-  .card-hover {
-    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-xl;
-  }
-
-  /* Stat card with subtle gradient border */
-  .stat-card {
-    @apply relative overflow-hidden rounded-2xl;
-    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.8) 100%);
-  }
-
-  .stat-card::before {
+  .premium-card::before {
     content: '';
-    @apply absolute inset-0 rounded-2xl;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 40%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Gold gradient for primary actions */
+  .gold-gradient {
+    @apply bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500;
+  }
+
+  /* Glow effects */
+  .glow-gold {
+    box-shadow: 0 0 60px -15px rgba(251, 191, 36, 0.4);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 40px -10px rgba(34, 197, 94, 0.5);
+  }
+
+  .glow-red {
+    box-shadow: 0 0 40px -10px rgba(239, 68, 68, 0.5);
+  }
+
+  /* Stat display */
+  .stat-value {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    @apply text-sm font-medium text-muted-foreground uppercase tracking-wider;
+  }
+
+  /* Premium button */
+  .btn-premium {
+    @apply relative px-8 py-4 rounded-2xl font-semibold text-black;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #fbbf24 100%);
+    background-size: 200% 200%;
+    animation: shimmer 3s ease-in-out infinite;
+    box-shadow: 0 10px 40px -10px rgba(251, 191, 36, 0.5);
+  }
+
+  .btn-premium:hover {
+    box-shadow: 0 15px 50px -10px rgba(251, 191, 36, 0.6);
+    transform: translateY(-2px);
+  }
+
+  /* Income/Expense colors */
+  .text-income {
+    @apply text-emerald-400;
+  }
+
+  .text-expense {
+    @apply text-rose-400;
+  }
+
+  .bg-income {
+    @apply bg-emerald-500;
+  }
+
+  .bg-expense {
+    @apply bg-rose-500;
   }
 }
 
-/* Premium scrollbar */
+/* Animations */
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
 @layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
+  .animate-shimmer {
+    animation: shimmer 3s ease-in-out infinite;
   }
 
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-track {
-    @apply bg-transparent;
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full;
+  /* Text gradients */
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400;
   }
 
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/40;
+  .text-gradient-silver {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-slate-300 via-white to-slate-300;
   }
 
   /* Hide scrollbar */
-  .scrollbar-hide {
+  .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  .scrollbar-hide::-webkit-scrollbar {
+  .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
 
-  /* Text gradient */
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-indigo-400;
-  }
-
-  .text-gradient-income {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-green-300;
-  }
-
-  .text-gradient-expense {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-red-300;
+  /* Number styling */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Number input without spinners */
+/* Remove spinners from number inputs */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -195,30 +227,7 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Smooth transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Premium animations */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite linear;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-  background-size: 200% 100%;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite ease-in-out;
+/* Selection color */
+::selection {
+  @apply bg-primary/30 text-foreground;
 }

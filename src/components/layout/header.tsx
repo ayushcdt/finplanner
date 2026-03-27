@@ -1,14 +1,11 @@
 "use client"
 
-import { Bell, Search, Plus, Calendar } from "lucide-react"
+import { Bell, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -23,60 +20,47 @@ export function Header({ title, subtitle }: HeaderProps) {
   const today = new Date()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-background/80 backdrop-blur-xl">
-      <div className="flex h-16 items-center justify-between px-6">
-        {/* Left Section - Title */}
+    <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-background/80 backdrop-blur-2xl">
+      <div className="flex h-20 items-center justify-between px-8">
+        {/* Left Section */}
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
-          )}
+          <p className="text-sm font-medium text-muted-foreground">
+            {format(today, "EEEE, MMMM d")}
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         </div>
 
-        {/* Right Section - Actions */}
-        <div className="flex items-center gap-3">
-          {/* Date Display */}
-          <div className="hidden items-center gap-2 rounded-full bg-white/[0.05] px-4 py-2 text-sm text-muted-foreground md:flex">
-            <Calendar className="h-4 w-4" />
-            <span>{format(today, "EEE, MMM d")}</span>
-          </div>
-
-          {/* Search */}
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search..."
-              className="w-[200px] rounded-full border-white/[0.08] bg-white/[0.05] pl-9 backdrop-blur-xl placeholder:text-muted-foreground/60 focus:bg-white/[0.08] lg:w-[280px]"
-            />
-          </div>
-
+        {/* Right Section */}
+        <div className="flex items-center gap-4">
           {/* Quick Add */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" className="gap-1.5 rounded-full px-4">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add</span>
+              <Button className="h-12 gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-400 px-6 font-semibold text-black shadow-lg shadow-amber-500/30 hover:shadow-amber-500/40 hover:brightness-110">
+                <Plus className="h-5 w-5" />
+                <span className="hidden sm:inline">Add New</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 glass-strong rounded-xl">
-              <DropdownMenuLabel className="text-muted-foreground">Quick Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/[0.08]" />
-              <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer">
-                <span>💸</span>
-                Add Expense
+            <DropdownMenuContent align="end" className="w-56 rounded-2xl border-white/[0.08] bg-card p-2">
+              <DropdownMenuItem className="gap-3 rounded-xl px-4 py-3 cursor-pointer focus:bg-white/[0.05]">
+                <span className="text-xl">💸</span>
+                <div>
+                  <p className="font-medium">Add Expense</p>
+                  <p className="text-xs text-muted-foreground">Record a payment</p>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer">
-                <span>💰</span>
-                Add Income
+              <DropdownMenuItem className="gap-3 rounded-xl px-4 py-3 cursor-pointer focus:bg-white/[0.05]">
+                <span className="text-xl">💰</span>
+                <div>
+                  <p className="font-medium">Add Income</p>
+                  <p className="text-xs text-muted-foreground">Record earnings</p>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer">
-                <span>🔄</span>
-                Add Transfer
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/[0.08]" />
-              <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer">
-                <span>📊</span>
-                Create Budget
+              <DropdownMenuItem className="gap-3 rounded-xl px-4 py-3 cursor-pointer focus:bg-white/[0.05]">
+                <span className="text-xl">📊</span>
+                <div>
+                  <p className="font-medium">Create Budget</p>
+                  <p className="text-xs text-muted-foreground">Plan your month</p>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -85,10 +69,10 @@ export function Header({ title, subtitle }: HeaderProps) {
           <ThemeToggle />
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full bg-white/[0.05] hover:bg-white/[0.08]">
-            <Bell className="h-4 w-4" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-gradient-to-r from-rose-500 to-red-400 shadow-lg shadow-rose-500/50" />
-          </Button>
+          <button className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] transition-all hover:bg-white/[0.08]">
+            <Bell className="h-5 w-5" />
+            <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50" />
+          </button>
         </div>
       </div>
     </header>
