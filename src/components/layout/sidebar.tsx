@@ -9,8 +9,11 @@ import {
   CreditCard,
   Tags,
   Settings,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useState } from "react"
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -30,32 +33,45 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
+  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <aside
       className={cn(
-        "flex w-72 flex-col border-r border-white/[0.06] bg-black/40",
+        "flex flex-col border-r border-white/[0.06] bg-black/40 transition-all duration-300",
+        collapsed ? "w-20" : "w-72",
         className
       )}
     >
       {/* Logo */}
-      <div className="flex h-24 items-center px-8">
-        <Link href="/dashboard" className="flex items-center gap-4">
-          <div className="relative flex h-12 w-12 items-center justify-center">
+      <div className="flex h-24 items-center justify-between px-4">
+        <Link href="/dashboard" className={cn("flex items-center gap-4", collapsed && "justify-center")}>
+          <div className="relative flex h-12 w-12 items-center justify-center shrink-0">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 blur-lg opacity-60" />
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500">
               <span className="text-2xl font-black text-black">₹</span>
             </div>
           </div>
-          <div>
-            <span className="text-xl font-bold tracking-tight">FinPlanner</span>
-            <p className="text-xs text-muted-foreground">Premium Finance</p>
-          </div>
+          {!collapsed && (
+            <div>
+              <span className="text-xl font-bold tracking-tight">FinPlanner</span>
+              <p className="text-xs text-muted-foreground">Premium Finance</p>
+            </div>
+          )}
         </Link>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-white/[0.05] hover:text-white",
+            collapsed && "absolute right-2 top-8"
+          )}
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-2 px-4 py-6">
+      <nav className="flex-1 space-y-2 px-3 py-6">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -63,15 +79,17 @@ export function Sidebar({ className }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-4 rounded-2xl px-5 py-4 text-sm font-medium transition-all duration-300",
+                "group flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-medium transition-all duration-300",
+                collapsed && "justify-center px-0",
                 isActive
                   ? "bg-gradient-to-r from-amber-500/20 to-transparent text-white"
                   : "text-muted-foreground hover:bg-white/[0.03] hover:text-white"
               )}
+              title={collapsed ? item.title : undefined}
             >
               <div
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300",
+                  "flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 shrink-0",
                   isActive
                     ? "bg-gradient-to-br from-amber-400 to-amber-500 text-black shadow-lg shadow-amber-500/30"
                     : "bg-white/[0.05] text-muted-foreground group-hover:bg-white/[0.08] group-hover:text-white"
@@ -79,9 +97,13 @@ export function Sidebar({ className }: SidebarProps) {
               >
                 <item.icon className="h-5 w-5" />
               </div>
-              <span className="font-medium">{item.title}</span>
-              {isActive && (
-                <div className="ml-auto h-2 w-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50" />
+              {!collapsed && (
+                <>
+                  <span className="font-medium">{item.title}</span>
+                  {isActive && (
+                    <div className="ml-auto h-2 w-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50" />
+                  )}
+                </>
               )}
             </Link>
           )
@@ -89,7 +111,7 @@ export function Sidebar({ className }: SidebarProps) {
       </nav>
 
       {/* Bottom Section */}
-      <div className="border-t border-white/[0.06] p-4">
+      <div className="border-t border-white/[0.06] p-3">
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -97,15 +119,17 @@ export function Sidebar({ className }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-4 rounded-2xl px-5 py-4 text-sm font-medium transition-all duration-300",
+                "group flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-medium transition-all duration-300",
+                collapsed && "justify-center px-0",
                 isActive
                   ? "bg-gradient-to-r from-amber-500/20 to-transparent text-white"
                   : "text-muted-foreground hover:bg-white/[0.03] hover:text-white"
               )}
+              title={collapsed ? item.title : undefined}
             >
               <div
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-xl transition-all",
+                  "flex h-10 w-10 items-center justify-center rounded-xl transition-all shrink-0",
                   isActive
                     ? "bg-gradient-to-br from-amber-400 to-amber-500 text-black"
                     : "bg-white/[0.05] group-hover:bg-white/[0.08]"
@@ -113,7 +137,7 @@ export function Sidebar({ className }: SidebarProps) {
               >
                 <item.icon className="h-5 w-5" />
               </div>
-              <span>{item.title}</span>
+              {!collapsed && <span>{item.title}</span>}
             </Link>
           )
         })}
