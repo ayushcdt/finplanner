@@ -14,7 +14,8 @@ import {
 import { useAnalytics } from "@/hooks/use-analytics"
 
 export function BudgetOverview() {
-  const { data, loading } = useAnalytics()
+  const currentDate = new Date()
+  const { data, loading } = useAnalytics(currentDate.getMonth() + 1, currentDate.getFullYear())
 
   if (loading) {
     return (

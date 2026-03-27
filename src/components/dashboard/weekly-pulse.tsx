@@ -52,7 +52,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 }
 
 export function WeeklyPulse() {
-  const { data, loading } = useAnalytics()
+  const { data, loading } = useAnalytics(new Date().getMonth() + 1, new Date().getFullYear())
 
   if (loading) {
     return (

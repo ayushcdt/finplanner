@@ -12,7 +12,7 @@ interface CategoryBudgetListProps {
 }
 
 export function CategoryBudgetList({ filter }: CategoryBudgetListProps) {
-  const { data, loading } = useAnalytics()
+  const { data, loading } = useAnalytics(new Date().getMonth() + 1, new Date().getFullYear())
 
   if (loading) {
     return (

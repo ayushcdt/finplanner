@@ -33,7 +33,7 @@ export function BudgetCreator({ onCancel, existingBudget, onSuccess }: BudgetCre
     if (existingBudget?.items) {
       const existing: Record<string, number> = {}
       existingBudget.items.forEach((item: any) => {
-        existing[item.categoryId] = Number(item.allocated)
+        existing[item.category_id] = Number(item.allocated)
       })
       setAllocations(existing)
     } else if (categories) {
@@ -102,7 +102,7 @@ export function BudgetCreator({ onCancel, existingBudget, onSuccess }: BudgetCre
 
   // Group categories by group
   const groupedCategories = (categories || []).reduce((acc, cat) => {
-    const group = cat.group || "Other"
+    const group = cat.group_name || "Other"
     if (!acc[group]) acc[group] = []
     acc[group].push(cat)
     return acc

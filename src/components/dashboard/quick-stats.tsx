@@ -14,7 +14,7 @@ import { formatCurrency } from "@/lib/utils"
 import { useAnalytics } from "@/hooks/use-analytics"
 
 export function QuickStats() {
-  const { data, loading, error } = useAnalytics()
+  const { data, loading, error } = useAnalytics(new Date().getMonth() + 1, new Date().getFullYear())
 
   if (loading) {
     return (

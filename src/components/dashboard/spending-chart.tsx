@@ -45,7 +45,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 }
 
 export function SpendingChart() {
-  const { data, loading, error } = useAnalytics()
+  const { data, loading, error } = useAnalytics(new Date().getMonth() + 1, new Date().getFullYear())
 
   if (loading) {
     return (
