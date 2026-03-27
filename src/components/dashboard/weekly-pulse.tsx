@@ -32,16 +32,16 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     const data = payload[0].payload
     const overBudget = data.spent > data.budget
     return (
-      <div className="rounded-lg border bg-background p-3 shadow-lg">
+      <div className="rounded-xl border border-white/[0.08] bg-card/95 p-4 shadow-2xl backdrop-blur-xl">
         <p className="font-medium">{data.label}</p>
-        <p className={`text-lg font-bold ${overBudget ? "text-expense" : "text-income"}`}>
+        <p className={`text-xl font-bold ${overBudget ? "text-rose-400" : "text-emerald-400"}`}>
           {formatCurrency(data.spent)}
         </p>
         <p className="text-sm text-muted-foreground">
           Budget: {formatCurrency(data.budget)}
         </p>
         {overBudget && (
-          <p className="text-sm text-expense">
+          <p className="mt-1 text-sm text-rose-400">
             Over by {formatCurrency(data.spent - data.budget)}
           </p>
         )}
@@ -58,7 +58,7 @@ export function WeeklyPulse() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Weekly Spending Pulse</CardTitle>
+          <CardTitle>Weekly Spending</CardTitle>
         </CardHeader>
         <CardContent className="flex h-[320px] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -74,15 +74,18 @@ export function WeeklyPulse() {
   const remainingBudget = budgetAllocated - totalSpent
   const daysRemaining = data?.daysRemaining || 0
 
-  if (weeklySpending.length === 0) {
+  if (weeklySpending.length === 0 || totalSpent === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Weekly Spending Pulse</CardTitle>
+          <CardTitle>Weekly Spending</CardTitle>
         </CardHeader>
         <CardContent className="flex h-[320px] flex-col items-center justify-center text-muted-foreground">
-          <p>No spending data this month</p>
-          <p className="text-sm">Start adding transactions to track weekly spending</p>
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.05]">
+            <span className="text-3xl">📈</span>
+          </div>
+          <p className="font-medium">No spending data</p>
+          <p className="text-sm">Add transactions to track weekly spending</p>
         </CardContent>
       </Card>
     )
@@ -92,60 +95,70 @@ export function WeeklyPulse() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Weekly Spending Pulse</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            {daysRemaining} days remaining
+          <span>Weekly Spending</span>
+          <span className="rounded-full bg-white/[0.05] px-3 py-1 text-sm font-normal text-muted-foreground">
+            {daysRemaining} days left
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px]">
+        <div className="h-[180px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={weeklySpending} barSize={40}>
+            <BarChart data={weeklySpending} barSize={36}>
               <XAxis
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                 tickFormatter={(value) => `₹${value / 1000}k`}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
               {weeklyBudget > 0 && (
                 <ReferenceLine
                   y={weeklyBudget}
-                  stroke="#94a3b8"
+                  stroke="rgba(148, 163, 184, 0.5)"
                   strokeDasharray="5 5"
                 />
               )}
-              <Bar dataKey="spent" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="spent" radius={[8, 8, 0, 0]}>
                 {weeklySpending.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={entry.spent > weeklyBudget ? "#ef4444" : "#22c55e"}
+                    fill={entry.spent > weeklyBudget ? "url(#redGradient)" : "url(#greenGradient)"}
                   />
                 ))}
               </Bar>
+              <defs>
+                <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#22c55e" />
+                  <stop offset="100%" stopColor="#16a34a" />
+                </linearGradient>
+                <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ef4444" />
+                  <stop offset="100%" stopColor="#dc2626" />
+                </linearGradient>
+              </defs>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Summary */}
-        <div className="mt-4 flex items-center justify-between rounded-lg bg-muted p-3">
-          <div>
-            <p className="text-sm text-muted-foreground">Remaining Budget</p>
-            <p className={`text-lg font-bold ${remainingBudget < 0 ? "text-expense" : "text-income"}`}>
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <div className="rounded-xl bg-white/[0.03] p-4">
+            <p className="text-sm text-muted-foreground">Remaining</p>
+            <p className={`text-xl font-bold ${remainingBudget < 0 ? "text-rose-400" : "text-emerald-400"}`}>
+              {remainingBudget < 0 && "-"}
               {formatCurrency(Math.abs(remainingBudget))}
-              {remainingBudget < 0 && " over"}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Daily Allowance</p>
-            <p className="text-lg font-bold">
+          <div className="rounded-xl bg-white/[0.03] p-4">
+            <p className="text-sm text-muted-foreground">Daily Budget</p>
+            <p className="text-xl font-bold">
               {formatCurrency(daysRemaining > 0 ? Math.max(0, remainingBudget / daysRemaining) : 0)}
             </p>
           </div>

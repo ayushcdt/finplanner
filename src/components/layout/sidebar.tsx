@@ -15,7 +15,6 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { useState } from "react"
 
 const navItems = [
@@ -41,29 +40,43 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col border-r bg-card transition-all duration-300",
-        collapsed ? "w-[70px]" : "w-[240px]",
+        "flex flex-col border-r border-white/[0.08] bg-card/30 backdrop-blur-2xl transition-all duration-300",
+        collapsed ? "w-[72px]" : "w-[260px]",
         className
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b px-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <Wallet className="h-7 w-7 text-primary" />
-          {!collapsed && <span className="text-xl font-bold">FinPlanner</span>}
+      <div className="flex h-16 items-center justify-between px-4">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-500 shadow-lg shadow-violet-500/30">
+            <Wallet className="h-5 w-5 text-white" />
+          </div>
+          {!collapsed && (
+            <span className="text-xl font-bold tracking-tight">FinPlanner</span>
+          )}
         </Link>
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-8 w-8 rounded-lg opacity-60 hover:opacity-100"
           onClick={() => setCollapsed(!collapsed)}
         >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {collapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className="flex-1 space-y-1 p-3">
+        <p className={cn(
+          "mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground/60",
+          collapsed && "sr-only"
+        )}>
+          Menu
+        </p>
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -71,13 +84,22 @@ export function Sidebar({ className }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-gradient-to-r from-violet-600/20 to-indigo-500/20 text-white shadow-lg"
+                  : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"
               )}
             >
-              <item.icon className="h-5 w-5 shrink-0" />
+              <div
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-lg transition-all",
+                  isActive
+                    ? "bg-gradient-to-br from-violet-600 to-indigo-500 text-white shadow-lg shadow-violet-500/30"
+                    : "bg-white/[0.05] group-hover:bg-white/[0.08]"
+                )}
+              >
+                <item.icon className="h-[18px] w-[18px]" />
+              </div>
               {!collapsed && <span>{item.title}</span>}
             </Link>
           )
@@ -85,8 +107,8 @@ export function Sidebar({ className }: SidebarProps) {
       </nav>
 
       {/* Bottom Section */}
-      <div className="mt-auto p-2">
-        <Separator className="mb-2" />
+      <div className="p-3">
+        <div className="mb-2 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -94,13 +116,22 @@ export function Sidebar({ className }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-gradient-to-r from-violet-600/20 to-indigo-500/20 text-white"
+                  : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"
               )}
             >
-              <item.icon className="h-5 w-5 shrink-0" />
+              <div
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-lg transition-all",
+                  isActive
+                    ? "bg-gradient-to-br from-violet-600 to-indigo-500 text-white"
+                    : "bg-white/[0.05] group-hover:bg-white/[0.08]"
+                )}
+              >
+                <item.icon className="h-[18px] w-[18px]" />
+              </div>
               {!collapsed && <span>{item.title}</span>}
             </Link>
           )

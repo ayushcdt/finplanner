@@ -34,7 +34,7 @@ export function RecentTransactions() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Recent Transactions</CardTitle>
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild className="rounded-full">
             <Link href="/dashboard/transactions" className="gap-1">
               View All
               <ArrowRight className="h-4 w-4" />
@@ -42,9 +42,12 @@ export function RecentTransactions() {
           </Button>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-10 text-center">
-          <p className="mb-2 text-muted-foreground">No transactions yet</p>
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.05]">
+            <span className="text-3xl">💳</span>
+          </div>
+          <p className="font-medium text-muted-foreground">No transactions yet</p>
           <p className="text-sm text-muted-foreground">
-            Add your first transaction to start tracking
+            Start tracking your expenses
           </p>
         </CardContent>
       </Card>
@@ -55,7 +58,7 @@ export function RecentTransactions() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Recent Transactions</CardTitle>
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild className="rounded-full">
           <Link href="/dashboard/transactions" className="gap-1">
             View All
             <ArrowRight className="h-4 w-4" />
@@ -63,15 +66,15 @@ export function RecentTransactions() {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-1">
+        <div className="space-y-2">
           {transactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-muted/50"
+              className="group flex items-center justify-between rounded-xl p-3 transition-all hover:bg-white/[0.03]"
             >
               {/* Left: Icon + Details */}
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.05] text-lg transition-all group-hover:bg-white/[0.08]">
                   {transaction.category?.icon || "📦"}
                 </div>
                 <div>
@@ -89,8 +92,8 @@ export function RecentTransactions() {
                 <p
                   className={`flex items-center justify-end gap-1 font-semibold ${
                     transaction.type === "INCOME"
-                      ? "text-income"
-                      : "text-expense"
+                      ? "text-emerald-400"
+                      : "text-rose-400"
                   }`}
                 >
                   {transaction.type === "INCOME" ? (
@@ -102,7 +105,7 @@ export function RecentTransactions() {
                   {formatCurrency(Number(transaction.amount))}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(transaction.date), "MMM d, yyyy")}
+                  {format(new Date(transaction.date), "MMM d")}
                 </p>
               </div>
             </div>

@@ -5,8 +5,6 @@ import {
   TrendingDown,
   Wallet,
   PiggyBank,
-  ArrowUpRight,
-  ArrowDownRight,
   Loader2,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,8 +18,8 @@ export function QuickStats() {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="flex h-[120px] items-center justify-center p-6">
+          <Card key={i} className="overflow-hidden">
+            <CardContent className="flex h-[140px] items-center justify-center p-6">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </CardContent>
           </Card>
@@ -47,110 +45,78 @@ export function QuickStats() {
 
   const { totalIncome, totalExpenses, savings, savingsRate, budgetUsed } = data
 
+  const stats = [
+    {
+      title: "Total Income",
+      value: formatCurrency(totalIncome),
+      icon: TrendingUp,
+      gradient: "from-emerald-600 to-green-500",
+      shadowColor: "shadow-emerald-500/20",
+      bgGlow: "bg-emerald-500/10",
+    },
+    {
+      title: "Total Expenses",
+      value: formatCurrency(totalExpenses),
+      icon: TrendingDown,
+      gradient: "from-rose-600 to-red-500",
+      shadowColor: "shadow-rose-500/20",
+      bgGlow: "bg-rose-500/10",
+    },
+    {
+      title: "Savings",
+      value: formatCurrency(Math.abs(savings)),
+      subtitle: savings < 0 ? "deficit" : `${savingsRate.toFixed(1)}% rate`,
+      icon: PiggyBank,
+      gradient: savings >= 0 ? "from-blue-600 to-cyan-500" : "from-rose-600 to-red-500",
+      shadowColor: savings >= 0 ? "shadow-blue-500/20" : "shadow-rose-500/20",
+      bgGlow: savings >= 0 ? "bg-blue-500/10" : "bg-rose-500/10",
+    },
+    {
+      title: "Budget Used",
+      value: `${budgetUsed.toFixed(0)}%`,
+      icon: Wallet,
+      gradient: budgetUsed >= 100 ? "from-rose-600 to-red-500" : budgetUsed >= 80 ? "from-amber-500 to-yellow-400" : "from-violet-600 to-indigo-500",
+      shadowColor: budgetUsed >= 100 ? "shadow-rose-500/20" : budgetUsed >= 80 ? "shadow-amber-500/20" : "shadow-violet-500/20",
+      bgGlow: budgetUsed >= 100 ? "bg-rose-500/10" : budgetUsed >= 80 ? "bg-amber-500/10" : "bg-violet-500/10",
+      showProgress: true,
+      progress: budgetUsed,
+    },
+  ]
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {/* Total Income */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Income
-              </p>
-              <p className="text-2xl font-bold text-income">
-                {formatCurrency(totalIncome)}
-              </p>
+      {stats.map((stat, index) => (
+        <Card key={index} className="group overflow-hidden transition-all hover:scale-[1.02] hover:shadow-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </p>
+                <p className="text-2xl font-bold tracking-tight">
+                  {stat.value}
+                </p>
+                {stat.subtitle && (
+                  <p className="text-xs text-muted-foreground">{stat.subtitle}</p>
+                )}
+              </div>
+              <div className={`rounded-xl bg-gradient-to-br ${stat.gradient} p-3 shadow-lg ${stat.shadowColor}`}>
+                <stat.icon className="h-5 w-5 text-white" />
+              </div>
             </div>
-            <div className="rounded-full bg-income-light p-3">
-              <TrendingUp className="h-5 w-5 text-income" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-1 text-sm">
-            <span className="text-muted-foreground">This month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Expenses */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total Expenses
-              </p>
-              <p className="text-2xl font-bold text-expense">
-                {formatCurrency(totalExpenses)}
-              </p>
-            </div>
-            <div className="rounded-full bg-expense-light p-3">
-              <TrendingDown className="h-5 w-5 text-expense" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-1 text-sm">
-            <span className="text-muted-foreground">This month</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Savings */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Savings
-              </p>
-              <p className={`text-2xl font-bold ${savings >= 0 ? "text-savings" : "text-expense"}`}>
-                {formatCurrency(Math.abs(savings))}
-                {savings < 0 && " deficit"}
-              </p>
-            </div>
-            <div className="rounded-full bg-savings-light p-3">
-              <PiggyBank className="h-5 w-5 text-savings" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-1 text-sm">
-            <span className="font-medium text-savings">
-              {savingsRate.toFixed(1)}%
-            </span>
-            <span className="text-muted-foreground">savings rate</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Budget Status */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Budget Used
-              </p>
-              <p className="text-2xl font-bold">
-                {budgetUsed.toFixed(0)}%
-              </p>
-            </div>
-            <div className="rounded-full bg-muted p-3">
-              <Wallet className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="h-2 rounded-full bg-muted">
-              <div
-                className={`h-2 rounded-full transition-all ${
-                  budgetUsed >= 100
-                    ? "bg-expense"
-                    : budgetUsed >= 80
-                    ? "bg-yellow-500"
-                    : "bg-income"
-                }`}
-                style={{ width: `${Math.min(budgetUsed, 100)}%` }}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            {stat.showProgress && (
+              <div className="mt-4">
+                <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
+                  <div
+                    className={`h-full rounded-full bg-gradient-to-r ${stat.gradient} transition-all`}
+                    style={{ width: `${Math.min(stat.progress || 0, 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }

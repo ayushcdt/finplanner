@@ -29,12 +29,12 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     return (
-      <div className="rounded-lg border bg-background p-3 shadow-lg">
+      <div className="rounded-xl border border-white/[0.08] bg-card/95 p-4 shadow-2xl backdrop-blur-xl">
         <p className="flex items-center gap-2 font-medium">
-          <span>{data.categoryIcon}</span>
+          <span className="text-lg">{data.categoryIcon}</span>
           {data.categoryName}
         </p>
-        <p className="text-lg font-bold" style={{ color: data.categoryColor }}>
+        <p className="mt-1 text-xl font-bold" style={{ color: data.categoryColor }}>
           {formatCurrency(data.amount)}
         </p>
         <p className="text-sm text-muted-foreground">{data.percentage.toFixed(1)}% of total</p>
@@ -70,14 +70,16 @@ export function SpendingChart() {
           <CardTitle>Spending by Category</CardTitle>
         </CardHeader>
         <CardContent className="flex h-[350px] flex-col items-center justify-center text-muted-foreground">
-          <p>No expenses recorded this month</p>
-          <p className="text-sm">Add transactions to see your spending breakdown</p>
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.05]">
+            <span className="text-3xl">📊</span>
+          </div>
+          <p className="font-medium">No expenses recorded</p>
+          <p className="text-sm">Add transactions to see your spending</p>
         </CardContent>
       </Card>
     )
   }
 
-  // Prepare data for chart (map to expected format)
   const chartData = categorySpending.map(item => ({
     name: item.categoryName,
     value: item.amount,
@@ -90,25 +92,30 @@ export function SpendingChart() {
         <CardTitle className="flex items-center justify-between">
           <span>Spending by Category</span>
           <span className="text-sm font-normal text-muted-foreground">
-            Total: {formatCurrency(totalSpending)}
+            {formatCurrency(totalSpending)}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[250px]">
+        <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={2}
+                innerRadius={55}
+                outerRadius={85}
+                paddingAngle={3}
                 dataKey="value"
+                stroke="none"
               >
                 {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.categoryColor} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.categoryColor}
+                    className="transition-all hover:opacity-80"
+                  />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
@@ -117,16 +124,27 @@ export function SpendingChart() {
         </div>
 
         {/* Legend */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-6 grid grid-cols-2 gap-3">
           {categorySpending.slice(0, 6).map((item) => (
-            <div key={item.categoryId} className="flex items-center gap-2 text-sm">
+            <div
+              key={item.categoryId}
+              className="flex items-center gap-3 rounded-xl bg-white/[0.03] p-3 transition-all hover:bg-white/[0.05]"
+            >
               <div
-                className="h-3 w-3 rounded-full"
-                style={{ backgroundColor: item.categoryColor }}
+                className="h-3 w-3 rounded-full shadow-lg"
+                style={{
+                  backgroundColor: item.categoryColor,
+                  boxShadow: `0 0 10px ${item.categoryColor}50`
+                }}
               />
-              <span className="truncate text-muted-foreground">
-                {item.categoryIcon} {item.categoryName}
-              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">
+                  {item.categoryIcon} {item.categoryName}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {item.percentage.toFixed(0)}%
+                </p>
+              </div>
             </div>
           ))}
         </div>
