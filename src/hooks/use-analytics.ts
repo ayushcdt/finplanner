@@ -2,7 +2,38 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { getTransactions, getAccounts, getBudget } from "@/lib/storage"
-import { getDaysInMonth, differenceInDays, endOfMonth } from "date-fns"
+import { differenceInDays, addMonths, format } from "date-fns"
+
+// Pay cycle configuration: 24th of month to 23rd of next month
+const PAY_CYCLE_START_DAY = 24
+
+// Calculate current pay cycle dates based on today
+function getPayCycleDates(today: Date = new Date()) {
+  const currentDay = today.getDate()
+  let cycleStartDate: Date
+  let cycleEndDate: Date
+
+  if (currentDay >= PAY_CYCLE_START_DAY) {
+    // We're in current month's cycle (24th of this month to 23rd of next month)
+    cycleStartDate = new Date(today.getFullYear(), today.getMonth(), PAY_CYCLE_START_DAY)
+    cycleEndDate = new Date(today.getFullYear(), today.getMonth() + 1, PAY_CYCLE_START_DAY - 1)
+  } else {
+    // We're in previous month's cycle (24th of last month to 23rd of this month)
+    cycleStartDate = new Date(today.getFullYear(), today.getMonth() - 1, PAY_CYCLE_START_DAY)
+    cycleEndDate = new Date(today.getFullYear(), today.getMonth(), PAY_CYCLE_START_DAY - 1)
+  }
+
+  return {
+    startDate: format(cycleStartDate, 'yyyy-MM-dd'),
+    endDate: format(cycleEndDate, 'yyyy-MM-dd'),
+    cycleStartDate,
+    cycleEndDate,
+    daysInCycle: differenceInDays(cycleEndDate, cycleStartDate) + 1,
+    daysRemaining: Math.max(0, differenceInDays(cycleEndDate, today) + 1),
+    cycleMonth: cycleStartDate.getMonth() + 1,
+    cycleYear: cycleStartDate.getFullYear(),
+  }
+}
 
 interface BudgetProgress {
   categoryId: string
@@ -27,6 +58,8 @@ interface AnalyticsSummary {
   budgetUsed: number
   daysRemaining: number
   daysInMonth: number
+  cycleStartDate: string
+  cycleEndDate: string
   budgetProgress: BudgetProgress[]
   categoryBreakdown: Array<{
     categoryId: string
@@ -55,7 +88,7 @@ interface AnalyticsSummary {
   }>
 }
 
-export function useAnalytics(month: number, year: number) {
+export function useAnalytics(month?: number, year?: number) {
   const [data, setData] = useState<AnalyticsSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -63,10 +96,13 @@ export function useAnalytics(month: number, year: number) {
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
+      // Use pay cycle dates instead of calendar month
+      const payCycle = getPayCycleDates()
+
       const [transactions, accounts, budget] = await Promise.all([
-        getTransactions({ month, year }),
+        getTransactions({ startDate: payCycle.startDate, endDate: payCycle.endDate }),
         getAccounts(),
-        getBudget(month, year),
+        getBudget(payCycle.cycleMonth, payCycle.cycleYear),
       ])
 
       let totalIncome = 0
@@ -110,11 +146,9 @@ export function useAnalytics(month: number, year: number) {
       const netSavings = totalIncome - totalExpenses
       const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0
 
-      // Budget calculations
-      const currentDate = new Date()
-      const monthEnd = endOfMonth(new Date(year, month - 1))
-      const daysInMonthCount = getDaysInMonth(new Date(year, month - 1))
-      const daysRemaining = Math.max(0, differenceInDays(monthEnd, currentDate) + 1)
+      // Budget calculations using pay cycle
+      const daysInMonthCount = payCycle.daysInCycle
+      const daysRemaining = payCycle.daysRemaining
 
       let budgetAllocated = 0
       const budgetProgress: BudgetProgress[] = []
@@ -150,16 +184,21 @@ export function useAnalytics(month: number, year: number) {
         .map(([date, amount]) => ({ date, amount }))
         .sort((a, b) => a.date.localeCompare(b.date))
 
-      // Calculate weekly spending from daily spending
+      // Calculate weekly spending based on pay cycle (24th to 23rd)
       const weeklySpending: Array<{ label: string; spent: number; budget: number }> = []
       const weeklyBudget = budgetAllocated / 4
 
-      // Group daily spending into weeks
+      // Group daily spending into pay cycle weeks
       const weekMap = new Map<number, number>()
+      const cycleStart = new Date(payCycle.startDate)
+
       dailySpending.forEach(({ date, amount }) => {
         const d = new Date(date)
-        const weekNum = Math.ceil(d.getDate() / 7)
-        weekMap.set(weekNum, (weekMap.get(weekNum) || 0) + amount)
+        const daysSinceCycleStart = differenceInDays(d, cycleStart)
+        const weekNum = Math.floor(daysSinceCycleStart / 7) + 1
+        if (weekNum >= 1 && weekNum <= 5) {
+          weekMap.set(weekNum, (weekMap.get(weekNum) || 0) + amount)
+        }
       })
 
       for (let i = 1; i <= 4; i++) {
@@ -185,6 +224,8 @@ export function useAnalytics(month: number, year: number) {
         budgetUsed: budgetUsedPercentage,
         daysRemaining,
         daysInMonth: daysInMonthCount,
+        cycleStartDate: payCycle.startDate,
+        cycleEndDate: payCycle.endDate,
         budgetProgress,
         categoryBreakdown,
         categorySpending: categoryBreakdown,
@@ -196,7 +237,7 @@ export function useAnalytics(month: number, year: number) {
     } finally {
       setLoading(false)
     }
-  }, [month, year])
+  }, [])
 
   useEffect(() => {
     fetchData()

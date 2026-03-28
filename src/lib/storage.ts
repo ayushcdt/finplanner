@@ -167,6 +167,8 @@ export async function createCategory(data: {
 export async function getTransactions(filters?: {
   month?: number
   year?: number
+  startDate?: string
+  endDate?: string
   type?: TransactionType
   limit?: number
 }): Promise<Transaction[]> {
@@ -179,7 +181,10 @@ export async function getTransactions(filters?: {
     `)
     .order('date', { ascending: false })
 
-  if (filters?.month && filters?.year) {
+  // Support custom date range (for pay cycles)
+  if (filters?.startDate && filters?.endDate) {
+    query = query.gte('date', filters.startDate).lte('date', filters.endDate)
+  } else if (filters?.month && filters?.year) {
     const startDate = new Date(filters.year, filters.month - 1, 1).toISOString().split('T')[0]
     const endDate = new Date(filters.year, filters.month, 0).toISOString().split('T')[0]
     query = query.gte('date', startDate).lte('date', endDate)
