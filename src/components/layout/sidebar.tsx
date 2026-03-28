@@ -13,7 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -34,6 +34,30 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Load saved state from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed")
+    if (saved !== null) {
+      setCollapsed(JSON.parse(saved))
+    }
+    setMounted(true)
+  }, [])
+
+  // Save state to localStorage
+  const toggleCollapsed = () => {
+    const newState = !collapsed
+    setCollapsed(newState)
+    localStorage.setItem("sidebar-collapsed", JSON.stringify(newState))
+  }
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <aside className={cn("flex w-72 flex-col border-r border-white/[0.06] bg-black/40", className)} />
+    )
+  }
 
   return (
     <aside
@@ -60,7 +84,7 @@ export function Sidebar({ className }: SidebarProps) {
           )}
         </Link>
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleCollapsed}
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-white/[0.05] hover:text-white",
             collapsed && "absolute right-2 top-8"
