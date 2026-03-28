@@ -95,6 +95,11 @@ interface AnalyticsSummary {
     spent: number
     budget: number
   }>
+  weeklyBudgetByWeek: Array<{
+    label: string
+    spent: number
+    budget: number
+  }>
 }
 
 export function useAnalytics(month?: number, year?: number) {
@@ -120,6 +125,7 @@ export function useAnalytics(month?: number, year?: number) {
       let weeklyBudgetSpent = 0
       const categorySpending = new Map<string, { amount: number; name: string; icon: string; color: string }>()
       const dailyMap = new Map<string, number>()
+      const weeklyBudgetDailyMap = new Map<string, number>() // Only for weekly budget categories
 
       transactions.forEach(t => {
         // Check if transaction is pending (not yet paid)
@@ -139,6 +145,8 @@ export function useAnalytics(month?: number, year?: number) {
 
             // Category breakdown (only for paid)
             const cat = t.category
+            const dateKey = typeof t.date === 'string' ? t.date.split('T')[0] : t.date
+
             if (cat) {
               const existing = categorySpending.get(t.category_id) || { amount: 0, name: cat.name, icon: cat.icon, color: cat.color }
               existing.amount += t.amount
@@ -147,11 +155,12 @@ export function useAnalytics(month?: number, year?: number) {
               // Track weekly budget spending (only for specific categories)
               if (WEEKLY_BUDGET_CATEGORIES.includes(cat.name)) {
                 weeklyBudgetSpent += t.amount
+                // Also track daily for weekly budget categories
+                weeklyBudgetDailyMap.set(String(dateKey), (weeklyBudgetDailyMap.get(String(dateKey)) || 0) + t.amount)
               }
             }
 
-            // Daily spending (only for paid)
-            const dateKey = typeof t.date === 'string' ? t.date.split('T')[0] : t.date
+            // Daily spending (all expenses)
             dailyMap.set(String(dateKey), (dailyMap.get(String(dateKey)) || 0) + t.amount)
           }
         }
@@ -238,6 +247,27 @@ export function useAnalytics(month?: number, year?: number) {
         })
       }
 
+      // Calculate weekly budget spending by week (only for budget categories)
+      const weeklyBudgetByWeek: Array<{ label: string; spent: number; budget: number }> = []
+      const weeklyBudgetWeekMap = new Map<number, number>()
+
+      Array.from(weeklyBudgetDailyMap.entries()).forEach(([date, amount]) => {
+        const d = new Date(date)
+        const daysSinceCycleStart = differenceInDays(d, cycleStart)
+        const weekNum = Math.floor(daysSinceCycleStart / 7) + 1
+        if (weekNum >= 1 && weekNum <= 5) {
+          weeklyBudgetWeekMap.set(weekNum, (weeklyBudgetWeekMap.get(weekNum) || 0) + amount)
+        }
+      })
+
+      for (let i = 1; i <= 4; i++) {
+        weeklyBudgetByWeek.push({
+          label: `Week ${i}`,
+          spent: weeklyBudgetWeekMap.get(i) || 0,
+          budget: WEEKLY_BUDGET,
+        })
+      }
+
       // Calculate budget used as percentage (weekly budget categories only)
       const budgetUsedPercentage = monthlyWeeklyBudget > 0 ? (weeklyBudgetSpent / monthlyWeeklyBudget) * 100 : 0
 
@@ -263,6 +293,7 @@ export function useAnalytics(month?: number, year?: number) {
         categorySpending: categoryBreakdown,
         dailySpending,
         weeklySpending,
+        weeklyBudgetByWeek,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch analytics")

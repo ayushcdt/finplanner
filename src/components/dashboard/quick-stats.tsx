@@ -110,10 +110,10 @@ export function QuickStats() {
             </div>
           </div>
           <p className={`text-4xl font-bold tracking-tight ${weeklyBudgetRemaining >= 0 ? 'text-violet-400' : 'text-rose-400'}`}>
-            {formatCurrency(Math.abs(weeklyBudgetRemaining))}
+            {formatCurrency(weeklyBudget)}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            {weeklyBudgetRemaining >= 0 ? 'left' : 'over'} of {formatCurrency(weeklyBudget * 4)}/month
+            per week • {formatCurrency(weeklyBudgetSpent)} spent
           </p>
           <div className="mt-3">
             <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
