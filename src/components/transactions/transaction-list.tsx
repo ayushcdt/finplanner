@@ -93,12 +93,18 @@ export function TransactionList({ onEdit }: TransactionListProps) {
     )
   }
 
-  // Calculate summary
+  // Helper to check if transaction is pending
+  const isPending = (t: any) => t.notes?.toUpperCase().includes('PENDING') || t.notes?.toUpperCase().includes('DUE')
+
+  // Calculate summary (only paid transactions)
   const totalIncome = transactions
-    .filter((t) => t.type === "INCOME")
+    .filter((t) => t.type === "INCOME" && !isPending(t))
     .reduce((sum, t) => sum + Number(t.amount), 0)
   const totalExpense = transactions
-    .filter((t) => t.type === "EXPENSE")
+    .filter((t) => t.type === "EXPENSE" && !isPending(t))
+    .reduce((sum, t) => sum + Number(t.amount), 0)
+  const totalPending = transactions
+    .filter((t) => isPending(t))
     .reduce((sum, t) => sum + Number(t.amount), 0)
 
   // Group by date
@@ -121,6 +127,14 @@ export function TransactionList({ onEdit }: TransactionListProps) {
               -{formatCurrency(totalExpense)}
             </p>
           </div>
+          {totalPending > 0 && (
+            <div>
+              <p className="text-sm text-muted-foreground">Pending/Due</p>
+              <p className="text-xl font-bold text-amber-400">
+                {formatCurrency(totalPending)}
+              </p>
+            </div>
+          )}
         </div>
         <div className="text-right">
           <p className="text-sm text-muted-foreground">Net</p>
@@ -157,20 +171,29 @@ export function TransactionList({ onEdit }: TransactionListProps) {
           <Card>
             <CardContent className="p-0">
               <div className="divide-y">
-                {group.transactions.map((transaction) => (
+                {group.transactions.map((transaction) => {
+                  const txPending = isPending(transaction)
+                  return (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 transition-colors hover:bg-muted/50"
+                    className={`flex items-center justify-between p-4 transition-colors hover:bg-muted/50 ${txPending ? 'bg-amber-500/5' : ''}`}
                   >
                     {/* Left: Icon + Details */}
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full text-lg ${txPending ? 'bg-amber-500/20 ring-1 ring-amber-500/30' : 'bg-muted'}`}>
                         {transaction.category.icon}
                       </div>
                       <div>
-                        <p className="font-medium">
-                          {transaction.description || transaction.category.name}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">
+                            {transaction.description || transaction.category.name}
+                          </p>
+                          {txPending && (
+                            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-400">
+                              DUE
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           {transaction.category.name} • {transaction.account.name}
                         </p>
@@ -182,6 +205,7 @@ export function TransactionList({ onEdit }: TransactionListProps) {
                       <div className="text-right">
                         <p
                           className={`flex items-center justify-end gap-1 font-semibold ${
+                            txPending ? "text-amber-400" :
                             transaction.type === "INCOME" ? "text-income" : "text-expense"
                           }`}
                         >
@@ -222,7 +246,8 @@ export function TransactionList({ onEdit }: TransactionListProps) {
                       </DropdownMenu>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>
@@ -244,14 +269,20 @@ function groupByDate(transactions: any[]) {
     groups[dateKey].push(transaction)
   })
 
+  // Helper to check pending status
+  const checkPending = (t: any) => t.notes?.toUpperCase().includes('PENDING') || t.notes?.toUpperCase().includes('DUE')
+
   return Object.entries(groups)
     .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
     .map(([date, items]) => ({
       date: new Date(date),
       transactions: items,
-      total: items.reduce(
-        (sum, t) => sum + (t.type === "INCOME" ? Number(t.amount) : -Number(t.amount)),
-        0
-      ),
+      // Only count paid transactions in total
+      total: items
+        .filter(t => !checkPending(t))
+        .reduce(
+          (sum, t) => sum + (t.type === "INCOME" ? Number(t.amount) : -Number(t.amount)),
+          0
+        ),
     }))
 }

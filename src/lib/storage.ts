@@ -224,18 +224,22 @@ export async function createTransaction(data: {
 
   if (error) throw error
 
-  // Update account balance
-  const balanceChange = data.type === 'INCOME' ? data.amount : -data.amount
-  const { error: updateError } = await supabase.rpc('update_account_balance', {
-    acc_id: data.account_id,
-    amount_change: balanceChange,
-  })
+  // Only update account balance if transaction is NOT pending
+  const isPending = data.notes?.toUpperCase().includes('PENDING') || data.notes?.toUpperCase().includes('DUE')
 
-  // If RPC doesn't exist, do it manually
-  if (updateError) {
-    const { data: acc } = await supabase.from('accounts').select('balance').eq('id', data.account_id).single()
-    if (acc) {
-      await supabase.from('accounts').update({ balance: acc.balance + balanceChange }).eq('id', data.account_id)
+  if (!isPending) {
+    const balanceChange = data.type === 'INCOME' ? data.amount : -data.amount
+    const { error: updateError } = await supabase.rpc('update_account_balance', {
+      acc_id: data.account_id,
+      amount_change: balanceChange,
+    })
+
+    // If RPC doesn't exist, do it manually
+    if (updateError) {
+      const { data: acc } = await supabase.from('accounts').select('balance').eq('id', data.account_id).single()
+      if (acc) {
+        await supabase.from('accounts').update({ balance: acc.balance + balanceChange }).eq('id', data.account_id)
+      }
     }
   }
 

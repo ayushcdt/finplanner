@@ -74,22 +74,30 @@ export function useAnalytics(month: number, year: number) {
       const dailyMap = new Map<string, number>()
 
       transactions.forEach(t => {
+        // Check if transaction is pending (not yet paid)
+        const isPending = t.notes?.toUpperCase().includes('PENDING') || t.notes?.toUpperCase().includes('DUE')
+
         if (t.type === 'INCOME') {
-          totalIncome += t.amount
-        } else if (t.type === 'EXPENSE') {
-          totalExpenses += t.amount
-
-          // Category breakdown
-          const cat = t.category
-          if (cat) {
-            const existing = categorySpending.get(t.category_id) || { amount: 0, name: cat.name, icon: cat.icon, color: cat.color }
-            existing.amount += t.amount
-            categorySpending.set(t.category_id, existing)
+          if (!isPending) {
+            totalIncome += t.amount
           }
+        } else if (t.type === 'EXPENSE') {
+          // Only count paid transactions in expenses
+          if (!isPending) {
+            totalExpenses += t.amount
 
-          // Daily spending
-          const dateKey = typeof t.date === 'string' ? t.date.split('T')[0] : t.date
-          dailyMap.set(String(dateKey), (dailyMap.get(String(dateKey)) || 0) + t.amount)
+            // Category breakdown (only for paid)
+            const cat = t.category
+            if (cat) {
+              const existing = categorySpending.get(t.category_id) || { amount: 0, name: cat.name, icon: cat.icon, color: cat.color }
+              existing.amount += t.amount
+              categorySpending.set(t.category_id, existing)
+            }
+
+            // Daily spending (only for paid)
+            const dateKey = typeof t.date === 'string' ? t.date.split('T')[0] : t.date
+            dailyMap.set(String(dateKey), (dailyMap.get(String(dateKey)) || 0) + t.amount)
+          }
         }
       })
 

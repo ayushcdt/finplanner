@@ -50,42 +50,53 @@ export function RecentTransactions() {
         </div>
       ) : (
         <div className="divide-y divide-white/[0.06]">
-          {transactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className="flex items-center justify-between px-8 py-5 transition-all hover:bg-white/[0.02]"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.05] text-2xl">
-                  {transaction.category?.icon || "📦"}
+          {transactions.map((transaction) => {
+            const isPending = transaction.notes?.toUpperCase().includes('PENDING') || transaction.notes?.toUpperCase().includes('DUE')
+            return (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between px-8 py-5 transition-all hover:bg-white/[0.02]"
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl ${isPending ? 'bg-amber-500/10 ring-1 ring-amber-500/30' : 'bg-white/[0.05]'}`}>
+                    {transaction.category?.icon || "📦"}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">
+                        {transaction.description || transaction.category?.name || "Unknown"}
+                      </p>
+                      {isPending && (
+                        <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-400">
+                          DUE
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {transaction.category?.name} • {format(new Date(transaction.date), "MMM d")}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">
-                    {transaction.description || transaction.category?.name || "Unknown"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {transaction.category?.name} • {format(new Date(transaction.date), "MMM d")}
-                  </p>
-                </div>
-              </div>
 
-              <div className="text-right">
-                <p
-                  className={`flex items-center gap-1 text-lg font-semibold ${
-                    transaction.type === "INCOME" ? "text-emerald-400" : "text-rose-400"
-                  }`}
-                >
-                  {transaction.type === "INCOME" ? (
-                    <ArrowUpRight className="h-5 w-5" />
-                  ) : (
-                    <ArrowDownRight className="h-5 w-5" />
-                  )}
-                  {transaction.type === "INCOME" ? "+" : "-"}
-                  {formatCurrency(Number(transaction.amount))}
-                </p>
+                <div className="text-right">
+                  <p
+                    className={`flex items-center gap-1 text-lg font-semibold ${
+                      isPending ? "text-amber-400" :
+                      transaction.type === "INCOME" ? "text-emerald-400" : "text-rose-400"
+                    }`}
+                  >
+                    {transaction.type === "INCOME" ? (
+                      <ArrowUpRight className="h-5 w-5" />
+                    ) : (
+                      <ArrowDownRight className="h-5 w-5" />
+                    )}
+                    {transaction.type === "INCOME" ? "+" : "-"}
+                    {formatCurrency(Number(transaction.amount))}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
