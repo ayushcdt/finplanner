@@ -9,6 +9,10 @@ import { differenceInDays, addMonths, format } from "date-fns"
 const PAY_CYCLE_START_DAY = 24
 const PAY_CYCLE_END_DAY = 25
 
+// Weekly budget configuration
+const WEEKLY_BUDGET = 5000
+const WEEKLY_BUDGET_CATEGORIES = ['Groceries', 'Transport', 'Household', 'Online Orders']
+
 // Calculate current pay cycle dates based on today
 function getPayCycleDates(today: Date = new Date()) {
   const currentDay = today.getDate()
@@ -52,10 +56,13 @@ interface AnalyticsSummary {
   totalIncome: number
   totalExpenses: number
   totalPending: number
-  netSavings: number
+  amountLeft: number
   savings: number
   savingsRate: number
   totalBalance: number
+  weeklyBudget: number
+  weeklyBudgetSpent: number
+  weeklyBudgetRemaining: number
   budgetAllocated: number
   budgetUsed: number
   daysRemaining: number
@@ -110,12 +117,13 @@ export function useAnalytics(month?: number, year?: number) {
       let totalIncome = 0
       let totalExpenses = 0
       let totalPending = 0
+      let weeklyBudgetSpent = 0
       const categorySpending = new Map<string, { amount: number; name: string; icon: string; color: string }>()
       const dailyMap = new Map<string, number>()
 
       transactions.forEach(t => {
         // Check if transaction is pending (not yet paid)
-        const isPending = t.notes?.toUpperCase().includes('PENDING') || t.notes?.toUpperCase().includes('DUE')
+        const isPending = t.notes?.toUpperCase().includes('PENDING')
 
         if (t.type === 'INCOME') {
           if (!isPending) {
@@ -135,6 +143,11 @@ export function useAnalytics(month?: number, year?: number) {
               const existing = categorySpending.get(t.category_id) || { amount: 0, name: cat.name, icon: cat.icon, color: cat.color }
               existing.amount += t.amount
               categorySpending.set(t.category_id, existing)
+
+              // Track weekly budget spending (only for specific categories)
+              if (WEEKLY_BUDGET_CATEGORIES.includes(cat.name)) {
+                weeklyBudgetSpent += t.amount
+              }
             }
 
             // Daily spending (only for paid)
@@ -145,8 +158,24 @@ export function useAnalytics(month?: number, year?: number) {
       })
 
       const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0)
-      const netSavings = totalIncome - totalExpenses
-      const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0
+
+      // Amount left = current account balance
+      const amountLeft = totalBalance
+
+      // Calculate current week number in cycle
+      const today = new Date()
+      const cycleStart = new Date(payCycle.startDate)
+      const daysSinceCycleStart = differenceInDays(today, cycleStart)
+      const currentWeekNum = Math.floor(daysSinceCycleStart / 7) + 1
+
+      // Monthly budget for weekly categories = 5000 * 4 weeks = 20000
+      const monthlyWeeklyBudget = WEEKLY_BUDGET * 4
+      const weeklyBudgetRemaining = monthlyWeeklyBudget - weeklyBudgetSpent
+
+      // Savings = leftover from weekly budget (only calculated at cycle end, 0 during cycle)
+      // For now, show potential savings if cycle ended today
+      const potentialSavings = Math.max(0, weeklyBudgetRemaining)
+      const savingsRate = monthlyWeeklyBudget > 0 ? (potentialSavings / monthlyWeeklyBudget) * 100 : 0
 
       // Budget calculations using pay cycle
       const daysInMonthCount = payCycle.daysInCycle
@@ -186,13 +215,11 @@ export function useAnalytics(month?: number, year?: number) {
         .map(([date, amount]) => ({ date, amount }))
         .sort((a, b) => a.date.localeCompare(b.date))
 
-      // Calculate weekly spending based on pay cycle (24th to 23rd)
+      // Calculate weekly spending based on pay cycle (24th to 25th)
       const weeklySpending: Array<{ label: string; spent: number; budget: number }> = []
-      const weeklyBudget = budgetAllocated / 4
 
-      // Group daily spending into pay cycle weeks
+      // Group daily spending into pay cycle weeks (cycleStart already defined above)
       const weekMap = new Map<number, number>()
-      const cycleStart = new Date(payCycle.startDate)
 
       dailySpending.forEach(({ date, amount }) => {
         const d = new Date(date)
@@ -207,22 +234,25 @@ export function useAnalytics(month?: number, year?: number) {
         weeklySpending.push({
           label: `Week ${i}`,
           spent: weekMap.get(i) || 0,
-          budget: weeklyBudget,
+          budget: WEEKLY_BUDGET,
         })
       }
 
-      // Calculate budget used as percentage
-      const budgetUsedPercentage = budgetAllocated > 0 ? (totalExpenses / budgetAllocated) * 100 : 0
+      // Calculate budget used as percentage (weekly budget categories only)
+      const budgetUsedPercentage = monthlyWeeklyBudget > 0 ? (weeklyBudgetSpent / monthlyWeeklyBudget) * 100 : 0
 
       setData({
         totalIncome,
         totalExpenses,
         totalPending,
-        netSavings,
-        savings: netSavings,
+        amountLeft,
+        savings: potentialSavings,
         savingsRate,
         totalBalance,
-        budgetAllocated,
+        weeklyBudget: WEEKLY_BUDGET,
+        weeklyBudgetSpent,
+        weeklyBudgetRemaining,
+        budgetAllocated: monthlyWeeklyBudget,
         budgetUsed: budgetUsedPercentage,
         daysRemaining,
         daysInMonth: daysInMonthCount,
