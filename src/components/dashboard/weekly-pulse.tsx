@@ -112,20 +112,27 @@ export function WeeklyPulse() {
         </div>
 
         {/* Stats */}
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          <div className="rounded-2xl bg-white/[0.03] p-5">
-            <p className="text-sm text-muted-foreground">This Week</p>
-            <p className={`mt-1 text-2xl font-bold ${currentWeekSpent > weeklyBudget ? 'text-rose-400' : 'text-white'}`}>
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          <div className="rounded-2xl bg-white/[0.03] p-4">
+            <p className="text-xs text-muted-foreground">This Week</p>
+            <p className={`mt-1 text-xl font-bold ${currentWeekSpent > weeklyBudget ? 'text-rose-400' : 'text-white'}`}>
               {formatCurrency(currentWeekSpent)}
             </p>
-            <p className="text-xs text-muted-foreground">of {formatCurrency(weeklyBudget)}/week</p>
+            <p className="text-xs text-muted-foreground">of {formatCurrency(weeklyBudget)}</p>
           </div>
-          <div className="rounded-2xl bg-white/[0.03] p-5">
-            <p className="text-sm text-muted-foreground">Month Total</p>
-            <p className="mt-1 text-2xl font-bold">
+          <div className="rounded-2xl bg-white/[0.03] p-4">
+            <p className="text-xs text-muted-foreground">Month Total</p>
+            <p className="mt-1 text-xl font-bold">
               {formatCurrency(weeklyBudgetSpent)}
             </p>
-            <p className="text-xs text-muted-foreground">of {formatCurrency(weeklyBudget * 4)}/month</p>
+            <p className="text-xs text-muted-foreground">of {formatCurrency(weeklyBudget * 4)}</p>
+          </div>
+          <div className="rounded-2xl bg-gradient-to-br from-violet-500/20 to-transparent p-4">
+            <p className="text-xs text-muted-foreground">Per Day</p>
+            <p className="mt-1 text-xl font-bold text-violet-400">
+              {formatCurrency(daysRemaining > 0 ? weeklyBudgetRemaining / daysRemaining : 0)}
+            </p>
+            <p className="text-xs text-muted-foreground">{daysRemaining} days left</p>
           </div>
         </div>
       </div>
