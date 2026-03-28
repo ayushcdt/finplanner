@@ -1,36 +1,19 @@
 "use client"
 
+import { useState } from "react"
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
-  Tooltip,
 } from "recharts"
 import { formatCurrency } from "@/lib/utils"
 import { useAnalytics } from "@/hooks/use-analytics"
 import { Loader2 } from "lucide-react"
 
-// Custom tooltip for pie chart
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload
-    return (
-      <div className="rounded-xl bg-black/90 border border-white/10 px-4 py-3 shadow-xl">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{data.categoryIcon}</span>
-          <span className="font-medium text-white">{data.categoryName}</span>
-        </div>
-        <p className="text-xl font-bold text-white mt-1">{formatCurrency(data.amount)}</p>
-        <p className="text-xs text-muted-foreground">{data.percentage.toFixed(1)}% of total</p>
-      </div>
-    )
-  }
-  return null
-}
-
 export function SpendingChart() {
   const { data, loading } = useAnalytics()
+  const [hoveredCategory, setHoveredCategory] = useState<any>(null)
 
   if (loading) {
     return (
@@ -79,8 +62,8 @@ export function SpendingChart() {
       </div>
 
       <div className="p-8">
-        {/* Chart with tooltip */}
-        <div className="relative mx-auto h-[200px] w-[200px]">
+        {/* Chart with hover info */}
+        <div className="relative h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -92,22 +75,35 @@ export function SpendingChart() {
                 paddingAngle={2}
                 dataKey="value"
                 stroke="none"
+                onMouseEnter={(_, index) => setHoveredCategory(chartData[index])}
+                onMouseLeave={() => setHoveredCategory(null)}
               >
                 {chartData.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.categoryColor}
-                    className="cursor-pointer transition-opacity hover:opacity-80"
+                    className="cursor-pointer transition-opacity"
+                    opacity={hoveredCategory ? (hoveredCategory.categoryId === entry.categoryId ? 1 : 0.5) : 1}
                   />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
-          {/* Center text */}
+          {/* Center text - shows hovered category or total */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <p className="text-2xl font-bold">{formatCurrency(totalSpending)}</p>
-            <p className="text-xs text-muted-foreground">Total Spent</p>
+            {hoveredCategory ? (
+              <>
+                <span className="text-2xl mb-1">{hoveredCategory.categoryIcon}</span>
+                <p className="text-xl font-bold">{formatCurrency(hoveredCategory.amount)}</p>
+                <p className="text-xs text-muted-foreground">{hoveredCategory.categoryName}</p>
+                <p className="text-xs text-muted-foreground">{hoveredCategory.percentage.toFixed(1)}%</p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-bold">{formatCurrency(totalSpending)}</p>
+                <p className="text-xs text-muted-foreground">Total Spent</p>
+              </>
+            )}
           </div>
         </div>
 
