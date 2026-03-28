@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from "react"
 import { getTransactions, getAccounts, getBudget } from "@/lib/storage"
 import { differenceInDays, addMonths, format } from "date-fns"
 
-// Pay cycle configuration: 24th of month to 23rd of next month
+// Pay cycle configuration: 24th of month to 25th of next month
+// Income on 24th, next income on 26th of next month, so cycle ends on 25th
 const PAY_CYCLE_START_DAY = 24
+const PAY_CYCLE_END_DAY = 25
 
 // Calculate current pay cycle dates based on today
 function getPayCycleDates(today: Date = new Date()) {
@@ -14,13 +16,13 @@ function getPayCycleDates(today: Date = new Date()) {
   let cycleEndDate: Date
 
   if (currentDay >= PAY_CYCLE_START_DAY) {
-    // We're in current month's cycle (24th of this month to 23rd of next month)
+    // We're in current month's cycle (24th of this month to 25th of next month)
     cycleStartDate = new Date(today.getFullYear(), today.getMonth(), PAY_CYCLE_START_DAY)
-    cycleEndDate = new Date(today.getFullYear(), today.getMonth() + 1, PAY_CYCLE_START_DAY - 1)
+    cycleEndDate = new Date(today.getFullYear(), today.getMonth() + 1, PAY_CYCLE_END_DAY)
   } else {
-    // We're in previous month's cycle (24th of last month to 23rd of this month)
+    // We're in previous month's cycle (24th of last month to 25th of this month)
     cycleStartDate = new Date(today.getFullYear(), today.getMonth() - 1, PAY_CYCLE_START_DAY)
-    cycleEndDate = new Date(today.getFullYear(), today.getMonth(), PAY_CYCLE_START_DAY - 1)
+    cycleEndDate = new Date(today.getFullYear(), today.getMonth(), PAY_CYCLE_END_DAY)
   }
 
   return {
