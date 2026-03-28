@@ -18,6 +18,7 @@ interface BudgetProgress {
 interface AnalyticsSummary {
   totalIncome: number
   totalExpenses: number
+  totalPending: number
   netSavings: number
   savings: number
   savingsRate: number
@@ -70,6 +71,7 @@ export function useAnalytics(month: number, year: number) {
 
       let totalIncome = 0
       let totalExpenses = 0
+      let totalPending = 0
       const categorySpending = new Map<string, { amount: number; name: string; icon: string; color: string }>()
       const dailyMap = new Map<string, number>()
 
@@ -82,8 +84,11 @@ export function useAnalytics(month: number, year: number) {
             totalIncome += t.amount
           }
         } else if (t.type === 'EXPENSE') {
-          // Only count paid transactions in expenses
-          if (!isPending) {
+          if (isPending) {
+            // Track pending/due amounts separately
+            totalPending += t.amount
+          } else {
+            // Only count paid transactions in expenses
             totalExpenses += t.amount
 
             // Category breakdown (only for paid)
@@ -171,6 +176,7 @@ export function useAnalytics(month: number, year: number) {
       setData({
         totalIncome,
         totalExpenses,
+        totalPending,
         netSavings,
         savings: netSavings,
         savingsRate,

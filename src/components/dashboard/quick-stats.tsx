@@ -1,6 +1,6 @@
 "use client"
 
-import { TrendingUp, TrendingDown, Wallet, Target, Loader2 } from "lucide-react"
+import { TrendingUp, TrendingDown, Wallet, Target, Clock, Loader2 } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import { useAnalytics } from "@/hooks/use-analytics"
 
@@ -9,8 +9,8 @@ export function QuickStats() {
 
   if (loading) {
     return (
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        {[...Array(5)].map((_, i) => (
           <div key={i} className="rounded-3xl bg-card border border-white/[0.06] p-8">
             <div className="flex h-32 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -25,10 +25,10 @@ export function QuickStats() {
     return null
   }
 
-  const { totalIncome, totalExpenses, savings, savingsRate, budgetUsed } = data
+  const { totalIncome, totalExpenses, totalPending, savings, savingsRate, budgetUsed } = data
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
       {/* Total Income */}
       <div className="group relative overflow-hidden rounded-3xl bg-card border border-white/[0.06] p-8 transition-all hover:border-emerald-500/30">
         <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl transition-all group-hover:bg-emerald-500/20" />
@@ -60,6 +60,23 @@ export function QuickStats() {
             {formatCurrency(totalExpenses)}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">This month</p>
+        </div>
+      </div>
+
+      {/* Due/Pending */}
+      <div className="group relative overflow-hidden rounded-3xl bg-card border border-white/[0.06] p-8 transition-all hover:border-orange-500/30">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-orange-500/10 blur-3xl transition-all group-hover:bg-orange-500/20" />
+        <div className="relative">
+          <div className="mb-6 flex items-center justify-between">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Due</p>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10">
+              <Clock className="h-6 w-6 text-orange-400" />
+            </div>
+          </div>
+          <p className="text-4xl font-bold tracking-tight text-orange-400">
+            {formatCurrency(totalPending)}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Pending payments</p>
         </div>
       </div>
 
